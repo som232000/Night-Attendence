@@ -1,0 +1,6 @@
+{
+  "name": "Night Shift",
+  "description": "Professional Night Shift and Mistri Labour Management app with dual Admin & Mistri panels, work logs, analytics, Excel export, and bilingual support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

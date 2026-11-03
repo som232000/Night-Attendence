@@ -29,6 +29,15 @@ interface NightShiftDao {
     @Query("SELECT * FROM night_shift_entries WHERE mistriId = :mistriId ORDER BY workDate DESC, id DESC")
     fun getEntriesByMistri(mistriId: Long): Flow<List<NightShiftEntryEntity>>
 
+    @Query("SELECT * FROM night_shift_entries WHERE mistriName = :mistriName AND labourName = :labourName AND workPlace = :workPlace AND workDate = :workDate AND shiftDetails = :shiftDetails LIMIT 1")
+    suspend fun findExistingEntry(
+        mistriName: String,
+        labourName: String,
+        workPlace: String,
+        workDate: String,
+        shiftDetails: String
+    ): NightShiftEntryEntity?
+
     @Query("SELECT COUNT(*) FROM night_shift_entries")
     fun getTotalEntryCount(): Flow<Int>
 

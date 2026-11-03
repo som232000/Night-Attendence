@@ -210,7 +210,7 @@ class NightShiftRepository(private val database: AppDatabase) {
                 if (existing == null) {
                     mistriDao.insertMistri(
                         MistriEntity(
-                            id = obj.optLong("id", 0L),
+                            id = 0L,
                             fullName = obj.getString("fullName"),
                             mobileNumber = mobile,
                             password = obj.optString("password", "password123"),
@@ -218,6 +218,12 @@ class NightShiftRepository(private val database: AppDatabase) {
                             createdAt = obj.optLong("createdAt", System.currentTimeMillis())
                         )
                     )
+                } else {
+                    // Update active status if changed by admin remotely
+                    val isActive = obj.optBoolean("isActive", true)
+                    if (existing.isActive != isActive) {
+                        mistriDao.updateMistriStatus(existing.id, isActive)
+                    }
                 }
             }
         }
@@ -226,15 +232,20 @@ class NightShiftRepository(private val database: AppDatabase) {
             val laboursArray = root.getJSONArray("labours")
             for (i in 0 until laboursArray.length()) {
                 val obj = laboursArray.getJSONObject(i)
-                labourDao.insertLabour(
-                    LabourEntity(
-                        id = obj.optLong("id", 0L),
-                        mistriId = obj.getLong("mistriId"),
-                        name = obj.getString("name"),
-                        mobileNumber = obj.optString("mobileNumber", ""),
-                        createdAt = obj.optLong("createdAt", System.currentTimeMillis())
+                val mistriId = obj.getLong("mistriId")
+                val name = obj.getString("name")
+                val existing = labourDao.findLabourByName(mistriId, name)
+                if (existing == null) {
+                    labourDao.insertLabour(
+                        LabourEntity(
+                            id = 0L,
+                            mistriId = mistriId,
+                            name = name,
+                            mobileNumber = obj.optString("mobileNumber", ""),
+                            createdAt = obj.optLong("createdAt", System.currentTimeMillis())
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -242,21 +253,39 @@ class NightShiftRepository(private val database: AppDatabase) {
             val entriesArray = root.getJSONArray("entries")
             for (i in 0 until entriesArray.length()) {
                 val obj = entriesArray.getJSONObject(i)
-                shiftDao.insertEntry(
-                    NightShiftEntryEntity(
-                        id = obj.optLong("id", 0L),
-                        mistriId = obj.getLong("mistriId"),
-                        mistriName = obj.getString("mistriName"),
-                        labourId = obj.optLong("labourId", 0L),
-                        labourName = obj.getString("labourName"),
-                        workPlace = obj.getString("workPlace"),
-                        workDate = obj.getString("workDate"),
-                        shiftDetails = obj.getString("shiftDetails"),
-                        remarks = obj.optString("remarks", ""),
-                        createdAt = obj.optLong("createdAt", System.currentTimeMillis())
-                    )
+                val mistriName = obj.getString("mistriName")
+                val labourName = obj.getString("labourName")
+                val workPlace = obj.getString("workPlace")
+                val workDate = obj.getString("workDate")
+                val shiftDetails = obj.getString("shiftDetails")
+                val remarks = obj.optString("remarks", "")
+                val createdAt = obj.optLong("createdAt", System.currentTimeMillis())
+
+                val existing = shiftDao.findExistingEntry(
+                    mistriName = mistriName,
+                    labourName = labourName,
+                    workPlace = workPlace,
+                    workDate = workDate,
+                    shiftDetails = shiftDetails
                 )
-                importedCount++
+
+                if (existing == null) {
+                    shiftDao.insertEntry(
+                        NightShiftEntryEntity(
+                            id = 0L,
+                            mistriId = obj.optLong("mistriId", 0L),
+                            mistriName = mistriName,
+                            labourId = obj.optLong("labourId", 0L),
+                            labourName = labourName,
+                            workPlace = workPlace,
+                            workDate = workDate,
+                            shiftDetails = shiftDetails,
+                            remarks = remarks,
+                            createdAt = createdAt
+                        )
+                    )
+                    importedCount++
+                }
             }
         }
 

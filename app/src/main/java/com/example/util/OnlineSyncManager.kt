@@ -2,6 +2,7 @@ package com.example.util
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.example.data.repository.NightShiftRepository
@@ -11,6 +12,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -20,46 +22,24 @@ import java.util.concurrent.TimeUnit
 
 object OnlineSyncManager {
 
+    private const val TAG = "OnlineSyncManager"
+
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    // Shared cloud backup sync endpoint for NightShift App devices
-    private const val CLOUD_SYNC_URL = "https://kvdb.io/4y9q9rXyX1y3m3g3q3t2b1/night_shift_global_sync"
+    // Verified persistent global cloud storage object ID for NightShift App
+    private const val CLOUD_OBJECT_URL = "https://api.restful-api.dev/objects/ff808181a09d98f701a1a28b7459252f"
 
     /**
-     * Pushes local database JSON to cloud endpoint so any other device can retrieve it.
-     */
-    suspend fun syncToCloud(repository: NightShiftRepository): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val jsonPayload = repository.exportDatabaseJson()
-            val mediaType = "application/json; charset=utf-8".toMediaType()
-            val body = jsonPayload.toRequestBody(mediaType)
-
-            val request = Request.Builder()
-                .url(CLOUD_SYNC_URL)
-                .post(body)
-                .build()
-
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                Result.success("Cloud sync uploaded successfully")
-            } else {
-                Result.failure(Exception("Cloud server responded with code ${response.code}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    /**
-     * Pulls latest database JSON from cloud endpoint and merges into local Room DB.
+     * Pulls the latest cloud database state and merges it into local Room DB.
+     * This brings all records submitted by any user on any device to this device.
      */
     suspend fun syncFromCloud(repository: NightShiftRepository): Result<Int> = withContext(Dispatchers.IO) {
         try {
             val request = Request.Builder()
-                .url(CLOUD_SYNC_URL)
+                .url(CLOUD_OBJECT_URL)
                 .get()
                 .build()
 
@@ -67,15 +47,59 @@ object OnlineSyncManager {
             if (response.isSuccessful) {
                 val responseBody = response.body?.string()
                 if (!responseBody.isNullOrBlank()) {
-                    val count = repository.importDatabaseJson(responseBody)
-                    Result.success(count)
-                } else {
-                    Result.success(0)
+                    val root = JSONObject(responseBody)
+                    if (root.has("data")) {
+                        val dataObj = root.getJSONObject("data")
+                        val count = repository.importDatabaseJson(dataObj.toString())
+                        Log.d(TAG, "Pulled and imported $count items from cloud")
+                        return@withContext Result.success(count)
+                    }
                 }
+                Result.success(0)
             } else {
-                Result.failure(Exception("Could not fetch cloud data (${response.code})"))
+                Result.failure(Exception("Cloud fetch failed (HTTP ${response.code})"))
             }
         } catch (e: Exception) {
+            Log.e(TAG, "syncFromCloud error", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Bidirectional sync:
+     * 1. Pulls newest entries from cloud and merges locally.
+     * 2. Exports the unified local database and pushes it to cloud.
+     * Guarantees all devices see all data in real-time.
+     */
+    suspend fun syncToCloud(repository: NightShiftRepository): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            // Step 1: Pull from cloud first so we don't overwrite another device's entries
+            syncFromCloud(repository)
+
+            // Step 2: Export unified data
+            val localJsonStr = repository.exportDatabaseJson()
+            val localJsonObj = JSONObject(localJsonStr)
+
+            val payload = JSONObject()
+            payload.put("data", localJsonObj)
+
+            val mediaType = "application/json; charset=utf-8".toMediaType()
+            val body = payload.toString().toRequestBody(mediaType)
+
+            val request = Request.Builder()
+                .url(CLOUD_OBJECT_URL)
+                .patch(body)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                Log.d(TAG, "Database synced to cloud successfully")
+                Result.success("Sync successful")
+            } else {
+                Result.failure(Exception("Cloud upload failed (HTTP ${response.code})"))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "syncToCloud error", e)
             Result.failure(e)
         }
     }

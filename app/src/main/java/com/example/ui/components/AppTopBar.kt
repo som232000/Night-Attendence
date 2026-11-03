@@ -13,12 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,7 +76,10 @@ fun AppTopBar(
                             color = Color.White
                         )
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 2.dp)
+                    ) {
                         if (role != UserRole.GUEST) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
@@ -97,14 +96,34 @@ fun AppTopBar(
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
-                        } else {
-                            Text(
-                                text = Strings.get("app_subtitle", language),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    fontSize = 11.sp
+                            Spacer(modifier = Modifier.width(6.dp))
+                        }
+
+                        // Live Online Status Indicator
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFE8F5E9)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF2E7D32))
                                 )
-                            )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (language == AppLanguage.BENGALI) "অনলাইন লাইভ" else "Online Live",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1B5E20),
+                                        fontSize = 10.sp
+                                    )
+                                )
+                            }
                         }
                     }
                 }

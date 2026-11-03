@@ -26,6 +26,9 @@ interface LabourDao {
     @Query("SELECT * FROM labours ORDER BY name ASC")
     fun getAllLabours(): Flow<List<LabourEntity>>
 
+    @Query("SELECT * FROM labours WHERE mistriId = :mistriId AND name = :name LIMIT 1")
+    suspend fun findLabourByName(mistriId: Long, name: String): LabourEntity?
+
     @Query("SELECT COUNT(*) FROM labours")
     fun getTotalLabourCount(): Flow<Int>
 

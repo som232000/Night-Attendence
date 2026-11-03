@@ -36,11 +36,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         val database = AppDatabase.getDatabase(application, viewModelScope)
         repository = NightShiftRepository(database)
-        // Automatically attempt background cloud pull on app launch so any device has synced records
+        // Automatically start real-time continuous online cloud sync across all devices
+        startContinuousCloudSync()
+    }
+
+    private fun startContinuousCloudSync() {
         viewModelScope.launch {
-            try {
-                OnlineSyncManager.syncFromCloud(repository)
-            } catch (_: Exception) {}
+            while (true) {
+                try {
+                    OnlineSyncManager.syncFromCloud(repository)
+                } catch (_: Exception) {}
+                kotlinx.coroutines.delay(8000L) // Polls online cloud every 8 seconds for real-time entries
+            }
         }
     }
 

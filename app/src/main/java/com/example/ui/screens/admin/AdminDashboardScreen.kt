@@ -2,6 +2,7 @@ package com.example.ui.screens.admin
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Engineering
 import androidx.compose.material.icons.filled.FileDownload
@@ -57,6 +59,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -79,6 +82,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.local.entity.LabourEntity
 import com.example.data.local.entity.MistriEntity
 import com.example.data.local.entity.NightShiftEntryEntity
 import com.example.ui.MainViewModel
@@ -120,6 +124,8 @@ fun AdminDashboardScreen(
     var editingEntry by remember { mutableStateOf<NightShiftEntryEntity?>(null) }
     var itemToDelete by remember { mutableStateOf<NightShiftEntryEntity?>(null) }
     var mistriToToggle by remember { mutableStateOf<MistriEntity?>(null) }
+    var mistriToDelete by remember { mutableStateOf<MistriEntity?>(null) }
+    var labourToDelete by remember { mutableStateOf<LabourEntity?>(null) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var importJsonText by remember { mutableStateOf("") }
@@ -128,6 +134,14 @@ fun AdminDashboardScreen(
     var newAdminUser by remember { mutableStateOf("admin") }
     var newAdminPass by remember { mutableStateOf("") }
     var confirmAdminPass by remember { mutableStateOf("") }
+
+    val navItemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = Color(0xFF0D47A1),
+        selectedTextColor = Color(0xFF0D47A1),
+        unselectedIconColor = Color(0xFF334155),
+        unselectedTextColor = Color(0xFF334155),
+        indicatorColor = Color(0xFFDBEAFE)
+    )
 
     Scaffold(
         topBar = {
@@ -147,33 +161,24 @@ fun AdminDashboardScreen(
                     selected = currentTab == 0,
                     onClick = { currentTab = 0 },
                     icon = { Icon(Icons.Default.Assignment, contentDescription = "Records") },
-                    label = { Text(Strings.get("records_and_entries", language), fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    label = { Text(Strings.get("records_and_entries", language), fontSize = 11.sp, fontWeight = if (currentTab == 0) FontWeight.Bold else FontWeight.Medium) },
+                    colors = navItemColors,
                     modifier = Modifier.testTag("admin_nav_records")
                 )
                 NavigationBarItem(
                     selected = currentTab == 1,
                     onClick = { currentTab = 1 },
                     icon = { Icon(Icons.Default.Engineering, contentDescription = "Mistris") },
-                    label = { Text(Strings.get("total_mistris", language), fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    label = { Text(Strings.get("total_mistris", language), fontSize = 11.sp, fontWeight = if (currentTab == 1) FontWeight.Bold else FontWeight.Medium) },
+                    colors = navItemColors,
                     modifier = Modifier.testTag("admin_nav_mistris")
                 )
                 NavigationBarItem(
                     selected = currentTab == 2,
                     onClick = { currentTab = 2 },
                     icon = { Icon(Icons.Default.Analytics, contentDescription = "Reports") },
-                    label = { Text(Strings.get("reports", language), fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    label = { Text(Strings.get("reports", language), fontSize = 11.sp, fontWeight = if (currentTab == 2) FontWeight.Bold else FontWeight.Medium) },
+                    colors = navItemColors,
                     modifier = Modifier.testTag("admin_nav_reports")
                 )
             }
@@ -267,10 +272,14 @@ fun AdminDashboardScreen(
                         .weight(1.2f)
                         .testTag("btn_sync_cloud"),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF0D47A1))
+                    border = BorderStroke(1.dp, Color(0xFF93C5FD)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF0D47A1)
+                    )
                 ) {
                     if (isSyncing) {
-                        CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                        CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = Color(0xFF0D47A1))
                     } else {
                         Icon(Icons.Default.CloudSync, contentDescription = null, modifier = Modifier.size(16.dp))
                     }
@@ -279,6 +288,7 @@ fun AdminDashboardScreen(
                         text = Strings.get("sync_now", language),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0D47A1),
                         maxLines = 1
                     )
                 }
@@ -289,11 +299,16 @@ fun AdminDashboardScreen(
                     modifier = Modifier
                         .weight(1f)
                         .testTag("btn_backup_data"),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF0F172A)
+                    )
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Backup", fontSize = 11.sp, maxLines = 1)
+                    Text("Backup", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A), maxLines = 1)
                 }
 
                 // Import / Restore Button
@@ -302,11 +317,16 @@ fun AdminDashboardScreen(
                     modifier = Modifier
                         .weight(1f)
                         .testTag("btn_import_data"),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF0F172A)
+                    )
                 ) {
                     Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Import", fontSize = 11.sp, maxLines = 1)
+                    Text("Import", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A), maxLines = 1)
                 }
 
                 // Change Password Button
@@ -320,7 +340,7 @@ fun AdminDashboardScreen(
                     Icon(
                         imageVector = Icons.Default.Security,
                         contentDescription = "Admin Security",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = Color(0xFF0D47A1),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -345,11 +365,15 @@ fun AdminDashboardScreen(
                         .weight(1f)
                         .testTag("export_excel_button"),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF1E88E5))
+                    border = BorderStroke(1.dp, Color(0xFF93C5FD)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF0D47A1)
+                    )
                 ) {
                     Icon(Icons.Default.FileDownload, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(Strings.get("export_excel", language), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(Strings.get("export_excel", language), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0D47A1))
                 }
 
                 Button(
@@ -365,11 +389,14 @@ fun AdminDashboardScreen(
                         .weight(1f)
                         .testTag("print_report_button"),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1565C0),
+                        contentColor = Color.White
+                    )
                 ) {
                     Icon(Icons.Default.Print, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(Strings.get("print_report", language), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(Strings.get("print_report", language), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
             }
 
@@ -409,7 +436,7 @@ fun AdminDashboardScreen(
                                     (if (selectedDateFilter != null) " • Date: $selectedDateFilter" else ""),
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF64748B)
+                                    color = Color(0xFF334155)
                                 )
                             )
                         }
@@ -425,7 +452,7 @@ fun AdminDashboardScreen(
                             ) {
                                 Text(
                                     text = Strings.get("no_entries_found", language),
-                                    color = Color(0xFF64748B)
+                                    color = Color(0xFF475569)
                                 )
                             }
                         } else {
@@ -478,7 +505,7 @@ fun AdminDashboardScreen(
                                 ) {
                                     Text(
                                         text = Strings.get("no_mistris_found", language),
-                                        color = Color(0xFF64748B)
+                                        color = Color(0xFF475569)
                                     )
                                 }
                             }
@@ -501,7 +528,10 @@ fun AdminDashboardScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Row(
+                                                modifier = Modifier.weight(1f),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
                                                 Box(
                                                     modifier = Modifier
                                                         .size(42.dp)
@@ -514,7 +544,7 @@ fun AdminDashboardScreen(
                                                     Icon(
                                                         imageVector = Icons.Default.Engineering,
                                                         contentDescription = null,
-                                                        tint = if (mistri.isActive) MaterialTheme.colorScheme.primary else Color(0xFFD32F2F),
+                                                        tint = if (mistri.isActive) Color(0xFF1565C0) else Color(0xFFD32F2F),
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }
@@ -528,42 +558,58 @@ fun AdminDashboardScreen(
                                                         )
                                                     )
                                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Icon(Icons.Default.Phone, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(12.dp))
+                                                        Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF475569), modifier = Modifier.size(12.dp))
                                                         Spacer(modifier = Modifier.width(4.dp))
                                                         Text(
                                                             text = mistri.mobileNumber,
-                                                            style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF64748B))
+                                                            style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF475569))
                                                         )
                                                     }
                                                 }
                                             }
 
-                                            // Status Badge & Activate/Deactivate Switch
-                                            Column(horizontalAlignment = Alignment.End) {
-                                                Surface(
-                                                    shape = RoundedCornerShape(6.dp),
-                                                    color = if (mistri.isActive) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
-                                                ) {
-                                                    Text(
-                                                        text = if (mistri.isActive) Strings.get("active", language) else Strings.get("inactive", language),
-                                                        style = MaterialTheme.typography.labelSmall.copy(
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = if (mistri.isActive) Color(0xFF2E7D32) else Color(0xFFC62828)
+                                            // Status Badge, Activate Switch & Delete Mistri Action
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Column(horizontalAlignment = Alignment.End) {
+                                                    Surface(
+                                                        shape = RoundedCornerShape(6.dp),
+                                                        color = if (mistri.isActive) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
+                                                    ) {
+                                                        Text(
+                                                            text = if (mistri.isActive) Strings.get("active", language) else Strings.get("inactive", language),
+                                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = if (mistri.isActive) Color(0xFF2E7D32) else Color(0xFFC62828)
+                                                            ),
+                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Switch(
+                                                        checked = mistri.isActive,
+                                                        onCheckedChange = { mistriToToggle = mistri },
+                                                        colors = SwitchDefaults.colors(
+                                                            checkedThumbColor = Color.White,
+                                                            checkedTrackColor = Color(0xFF2E7D32),
+                                                            uncheckedTrackColor = Color(0xFFE2E8F0)
                                                         ),
-                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        modifier = Modifier.testTag("toggle_mistri_${mistri.id}")
                                                     )
                                                 }
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Switch(
-                                                    checked = mistri.isActive,
-                                                    onCheckedChange = { mistriToToggle = mistri },
-                                                    colors = SwitchDefaults.colors(
-                                                        checkedThumbColor = Color.White,
-                                                        checkedTrackColor = Color(0xFF2E7D32),
-                                                        uncheckedTrackColor = Color(0xFFE2E8F0)
-                                                    ),
-                                                    modifier = Modifier.testTag("toggle_mistri_${mistri.id}")
-                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                IconButton(
+                                                    onClick = { mistriToDelete = mistri },
+                                                    modifier = Modifier
+                                                        .size(40.dp)
+                                                        .testTag("delete_mistri_${mistri.id}")
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Delete,
+                                                        contentDescription = Strings.get("delete_mistri", language),
+                                                        tint = Color(0xFFD32F2F),
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                }
                                             }
                                         }
 
@@ -574,7 +620,7 @@ fun AdminDashboardScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clip(RoundedCornerShape(8.dp))
-                                                .background(Color(0xFFF8FAFC))
+                                                .background(Color(0xFFF1F5F9))
                                                 .clickable { expandedLabours = !expandedLabours }
                                                 .padding(horizontal = 10.dp, vertical = 8.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -585,25 +631,25 @@ fun AdminDashboardScreen(
                                                     text = "${mistriLabours.size} ${Strings.get("total_labours", language)} | $mistriEntryCount ${Strings.get("total_entries", language)}",
                                                     style = MaterialTheme.typography.bodySmall.copy(
                                                         fontWeight = FontWeight.SemiBold,
-                                                        color = Color(0xFF334155)
+                                                        color = Color(0xFF1E293B)
                                                     )
                                                 )
                                             }
                                             Icon(
                                                 imageVector = if (expandedLabours) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                                 contentDescription = "Expand",
-                                                tint = Color.Gray,
+                                                tint = Color(0xFF334155),
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
 
-                                        // Collapsible Labour list
+                                        // Collapsible Labour list with delete action
                                         AnimatedVisibility(visible = expandedLabours) {
                                             Column(modifier = Modifier.padding(top = 8.dp)) {
                                                 if (mistriLabours.isEmpty()) {
                                                     Text(
                                                         text = Strings.get("no_labours_found", language),
-                                                        style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
+                                                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF475569)),
                                                         modifier = Modifier.padding(vertical = 4.dp)
                                                     )
                                                 } else {
@@ -611,17 +657,36 @@ fun AdminDashboardScreen(
                                                         Row(
                                                             modifier = Modifier
                                                                 .fillMaxWidth()
-                                                                .padding(vertical = 4.dp),
-                                                            horizontalArrangement = Arrangement.SpaceBetween
+                                                                .padding(vertical = 3.dp),
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            verticalAlignment = Alignment.CenterVertically
                                                         ) {
-                                                            Text(
-                                                                text = "• ${labour.name}",
-                                                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
-                                                            )
-                                                            if (labour.mobileNumber.isNotBlank()) {
+                                                            Column(modifier = Modifier.weight(1f)) {
                                                                 Text(
-                                                                    text = labour.mobileNumber,
-                                                                    style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
+                                                                    text = "• ${labour.name}",
+                                                                    style = MaterialTheme.typography.bodySmall.copy(
+                                                                        fontWeight = FontWeight.SemiBold,
+                                                                        color = Color(0xFF0F172A)
+                                                                    )
+                                                                )
+                                                                if (labour.mobileNumber.isNotBlank()) {
+                                                                    Text(
+                                                                        text = "  ${labour.mobileNumber}",
+                                                                        style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF475569))
+                                                                    )
+                                                                }
+                                                            }
+                                                            IconButton(
+                                                                onClick = { labourToDelete = labour },
+                                                                modifier = Modifier
+                                                                    .size(32.dp)
+                                                                    .testTag("admin_delete_labour_${labour.id}")
+                                                            ) {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.Delete,
+                                                                    contentDescription = Strings.get("delete_labour", language),
+                                                                    tint = Color(0xFFD32F2F),
+                                                                    modifier = Modifier.size(18.dp)
                                                                 )
                                                             }
                                                         }
@@ -654,7 +719,7 @@ fun AdminDashboardScreen(
                             ) {
                                 val mistriStats = allEntries.groupBy { it.mistriName }
                                 if (mistriStats.isEmpty()) {
-                                    Text(Strings.get("no_entries_found", language), color = Color.Gray, fontSize = 12.sp)
+                                    Text(Strings.get("no_entries_found", language), color = Color(0xFF475569), fontSize = 12.sp)
                                 } else {
                                     mistriStats.forEach { (mistri, list) ->
                                         ReportRow(label = mistri, count = list.size, language = language)
@@ -672,7 +737,7 @@ fun AdminDashboardScreen(
                             ) {
                                 val siteStats = allEntries.groupBy { it.workPlace }
                                 if (siteStats.isEmpty()) {
-                                    Text(Strings.get("no_entries_found", language), color = Color.Gray, fontSize = 12.sp)
+                                    Text(Strings.get("no_entries_found", language), color = Color(0xFF475569), fontSize = 12.sp)
                                 } else {
                                     siteStats.forEach { (site, list) ->
                                         ReportRow(label = site, count = list.size, language = language)
@@ -690,7 +755,7 @@ fun AdminDashboardScreen(
                             ) {
                                 val labourStats = allEntries.groupBy { it.labourName }
                                 if (labourStats.isEmpty()) {
-                                    Text(Strings.get("no_entries_found", language), color = Color.Gray, fontSize = 12.sp)
+                                    Text(Strings.get("no_entries_found", language), color = Color(0xFF475569), fontSize = 12.sp)
                                 } else {
                                     labourStats.forEach { (labour, list) ->
                                         ReportRow(label = labour, count = list.size, language = language)
@@ -708,7 +773,7 @@ fun AdminDashboardScreen(
                             ) {
                                 val dateStats = allEntries.groupBy { it.workDate }
                                 if (dateStats.isEmpty()) {
-                                    Text(Strings.get("no_entries_found", language), color = Color.Gray, fontSize = 12.sp)
+                                    Text(Strings.get("no_entries_found", language), color = Color(0xFF475569), fontSize = 12.sp)
                                 } else {
                                     dateStats.entries.sortedByDescending { it.key }.take(10).forEach { (date, list) ->
                                         ReportRow(label = date, count = list.size, language = language)
@@ -722,17 +787,32 @@ fun AdminDashboardScreen(
         }
     }
 
+    val dialogFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color(0xFF0F172A),
+        unfocusedTextColor = Color(0xFF0F172A),
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        focusedBorderColor = Color(0xFF1565C0),
+        unfocusedBorderColor = Color(0xFF94A3B8),
+        focusedLabelColor = Color(0xFF1565C0),
+        unfocusedLabelColor = Color(0xFF334155),
+        cursorColor = Color(0xFF1565C0)
+    )
+
     // Change Admin Password Dialog
     if (showChangePasswordDialog) {
         AlertDialog(
             onDismissRequest = { showChangePasswordDialog = false },
-            title = { Text(Strings.get("admin_security", language), fontWeight = FontWeight.Bold) },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = { Text(Strings.get("admin_security", language), fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)) },
             text = {
                 Column {
                     Text(
                         text = "Update the secret username and password for Main Admin:",
                         fontSize = 12.sp,
-                        color = Color(0xFF64748B)
+                        color = Color(0xFF475569)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     OutlinedTextField(
@@ -740,7 +820,8 @@ fun AdminDashboardScreen(
                         onValueChange = { newAdminUser = it },
                         label = { Text(Strings.get("user_id", language)) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = dialogFieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -748,7 +829,8 @@ fun AdminDashboardScreen(
                         onValueChange = { newAdminPass = it },
                         label = { Text(Strings.get("new_password", language)) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = dialogFieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -756,7 +838,8 @@ fun AdminDashboardScreen(
                         onValueChange = { confirmAdminPass = it },
                         label = { Text(Strings.get("confirm_password", language)) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = dialogFieldColors
                     )
                 }
             },
@@ -781,12 +864,12 @@ fun AdminDashboardScreen(
                         )
                     }
                 ) {
-                    Text(Strings.get("save", language))
+                    Text(Strings.get("save", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showChangePasswordDialog = false }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -796,13 +879,16 @@ fun AdminDashboardScreen(
     if (showImportDialog) {
         AlertDialog(
             onDismissRequest = { showImportDialog = false },
-            title = { Text(Strings.get("import_backup", language), fontWeight = FontWeight.Bold) },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = { Text(Strings.get("import_backup", language), fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)) },
             text = {
                 Column {
                     Text(
                         text = "Paste Backup JSON content or import all entries from another device:",
                         fontSize = 12.sp,
-                        color = Color(0xFF64748B)
+                        color = Color(0xFF475569)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -812,7 +898,8 @@ fun AdminDashboardScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(140.dp),
-                        maxLines = 6
+                        maxLines = 6,
+                        colors = dialogFieldColors
                     )
                 }
             },
@@ -827,12 +914,12 @@ fun AdminDashboardScreen(
                         showImportDialog = false
                     }
                 ) {
-                    Text(Strings.get("save", language))
+                    Text(Strings.get("save", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showImportDialog = false }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -843,15 +930,20 @@ fun AdminDashboardScreen(
         val newStatus = !mistri.isActive
         AlertDialog(
             onDismissRequest = { mistriToToggle = null },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
             title = {
                 Text(
                     text = if (newStatus) Strings.get("activate", language) else Strings.get("deactivate", language),
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
                 )
             },
             text = {
                 Text(
-                    text = "${mistri.fullName}: ${if (newStatus) "Activate this Mistri account?" else "Deactivate this Mistri account? They will not be able to log in until reactivated."}"
+                    text = "${mistri.fullName}: ${if (newStatus) "Activate this Mistri account?" else "Deactivate this Mistri account? They will not be able to log in until reactivated."}",
+                    color = Color(0xFF1E293B)
                 )
             },
             confirmButton = {
@@ -864,12 +956,90 @@ fun AdminDashboardScreen(
                         containerColor = if (newStatus) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text(if (newStatus) Strings.get("activate", language) else Strings.get("deactivate", language))
+                    Text(if (newStatus) Strings.get("activate", language) else Strings.get("deactivate", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { mistriToToggle = null }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
+                }
+            }
+        )
+    }
+
+    // Delete Mistri Confirmation Dialog
+    mistriToDelete?.let { mistri ->
+        AlertDialog(
+            onDismissRequest = { mistriToDelete = null },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = {
+                Text(
+                    text = Strings.get("delete_mistri", language),
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB71C1C)
+                )
+            },
+            text = {
+                Text(
+                    text = "${mistri.fullName} (${mistri.mobileNumber})\n\n${Strings.get("confirm_delete_mistri", language)}",
+                    color = Color(0xFF1E293B)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteMistri(mistri)
+                        mistriToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(Strings.get("delete", language), color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mistriToDelete = null }) {
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
+                }
+            }
+        )
+    }
+
+    // Delete Labour Confirmation Dialog (from Admin Mistri card)
+    labourToDelete?.let { labour ->
+        AlertDialog(
+            onDismissRequest = { labourToDelete = null },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = {
+                Text(
+                    text = Strings.get("delete_labour", language),
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB71C1C)
+                )
+            },
+            text = {
+                Text(
+                    text = "${labour.name}\n\n${Strings.get("confirm_delete_labour", language)}",
+                    color = Color(0xFF1E293B)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteLabour(labour)
+                        labourToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(Strings.get("delete", language), color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { labourToDelete = null }) {
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -884,45 +1054,52 @@ fun AdminDashboardScreen(
 
         AlertDialog(
             onDismissRequest = { editingEntry = null },
-            title = { Text(Strings.get("update_entry", language), fontWeight = FontWeight.Bold) },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = { Text(Strings.get("update_entry", language), fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)) },
             text = {
                 Column {
                     Text(
                         text = "${Strings.get("mistri_name", language)}: ${entry.mistriName}",
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color(0xFF0D47A1)
                     )
                     Text(
                         text = "${Strings.get("labour_name", language)}: ${entry.labourName}",
-                        style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray)
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF475569))
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     OutlinedTextField(
                         value = editPlace,
                         onValueChange = { editPlace = it },
                         label = { Text(Strings.get("workplace_site", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = dialogFieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = editDate,
                         onValueChange = { editDate = it },
                         label = { Text(Strings.get("work_date", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = dialogFieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = editDetails,
                         onValueChange = { editDetails = it },
                         label = { Text(Strings.get("night_shift_details", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = dialogFieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = editRemarks,
                         onValueChange = { editRemarks = it },
                         label = { Text(Strings.get("remarks", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = dialogFieldColors
                     )
                 }
             },
@@ -944,12 +1121,12 @@ fun AdminDashboardScreen(
                         )
                     }
                 ) {
-                    Text(Strings.get("save", language))
+                    Text(Strings.get("save", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { editingEntry = null }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -959,8 +1136,11 @@ fun AdminDashboardScreen(
     itemToDelete?.let { entry ->
         AlertDialog(
             onDismissRequest = { itemToDelete = null },
-            title = { Text(Strings.get("delete", language), fontWeight = FontWeight.Bold) },
-            text = { Text(Strings.get("confirm_delete", language)) },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = { Text(Strings.get("delete", language), fontWeight = FontWeight.Bold, color = Color(0xFFB71C1C)) },
+            text = { Text(Strings.get("confirm_delete", language), color = Color(0xFF1E293B)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -969,12 +1149,12 @@ fun AdminDashboardScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text(Strings.get("delete", language))
+                    Text(Strings.get("delete", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { itemToDelete = null }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -997,7 +1177,7 @@ fun ReportCard(
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = Color(0xFF1565C0), modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
@@ -1024,17 +1204,17 @@ fun ReportRow(label: String, count: Int, language: AppLanguage) {
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF334155))
+            style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF1E293B), fontWeight = FontWeight.Medium)
         )
         Surface(
             shape = RoundedCornerShape(6.dp),
-            color = MaterialTheme.colorScheme.primaryContainer
+            color = Color(0xFFDBEAFE)
         ) {
             Text(
                 text = "$count ${Strings.get("entries", language)}",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color(0xFF0D47A1)
                 ),
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
             )

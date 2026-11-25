@@ -126,6 +126,28 @@ fun MistriHomeScreen(
     var itemToDelete by remember { mutableStateOf<NightShiftEntryEntity?>(null) }
     var labourToDelete by remember { mutableStateOf<LabourEntity?>(null) }
 
+    val navItemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = Color(0xFF0D47A1),
+        selectedTextColor = Color(0xFF0D47A1),
+        unselectedIconColor = Color(0xFF334155),
+        unselectedTextColor = Color(0xFF334155),
+        indicatorColor = Color(0xFFDBEAFE)
+    )
+
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color(0xFF0F172A),
+        unfocusedTextColor = Color(0xFF0F172A),
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        focusedBorderColor = Color(0xFF1565C0),
+        unfocusedBorderColor = Color(0xFF94A3B8),
+        focusedLabelColor = Color(0xFF1565C0),
+        unfocusedLabelColor = Color(0xFF334155),
+        focusedPlaceholderColor = Color(0xFF64748B),
+        unfocusedPlaceholderColor = Color(0xFF64748B),
+        cursorColor = Color(0xFF1565C0)
+    )
+
     Scaffold(
         topBar = {
             AppTopBar(
@@ -144,33 +166,24 @@ fun MistriHomeScreen(
                     selected = currentTab == 0,
                     onClick = { currentTab = 0 },
                     icon = { Icon(Icons.Default.PostAdd, contentDescription = "New Entry") },
-                    label = { Text(Strings.get("new_shift_entry", language), fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    label = { Text(Strings.get("new_shift_entry", language), fontSize = 11.sp, fontWeight = if (currentTab == 0) FontWeight.Bold else FontWeight.Medium) },
+                    colors = navItemColors,
                     modifier = Modifier.testTag("nav_mistri_new_entry")
                 )
                 NavigationBarItem(
                     selected = currentTab == 1,
                     onClick = { currentTab = 1 },
                     icon = { Icon(Icons.Default.Assignment, contentDescription = "Records") },
-                    label = { Text(Strings.get("records_and_entries", language), fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    label = { Text(Strings.get("records_and_entries", language), fontSize = 11.sp, fontWeight = if (currentTab == 1) FontWeight.Bold else FontWeight.Medium) },
+                    colors = navItemColors,
                     modifier = Modifier.testTag("nav_mistri_records")
                 )
                 NavigationBarItem(
                     selected = currentTab == 2,
                     onClick = { currentTab = 2 },
                     icon = { Icon(Icons.Default.Group, contentDescription = "Labours") },
-                    label = { Text(Strings.get("labour_management", language), fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
+                    label = { Text(Strings.get("labour_management", language), fontSize = 11.sp, fontWeight = if (currentTab == 2) FontWeight.Bold else FontWeight.Medium) },
+                    colors = navItemColors,
                     modifier = Modifier.testTag("nav_mistri_labours")
                 )
             }
@@ -299,15 +312,23 @@ fun MistriHomeScreen(
                                         readOnly = true,
                                         label = { Text(Strings.get("mistri_name", language)) },
                                         leadingIcon = {
-                                            Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                            Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF1565C0))
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("entry_mistri_name_field"),
                                         shape = RoundedCornerShape(12.dp),
                                         colors = OutlinedTextFieldDefaults.colors(
+                                            focusedTextColor = Color(0xFF0F172A),
+                                            unfocusedTextColor = Color(0xFF0F172A),
+                                            disabledTextColor = Color(0xFF0F172A),
                                             disabledContainerColor = Color(0xFFF1F5F9),
-                                            focusedContainerColor = Color(0xFFF8FAFC)
+                                            focusedContainerColor = Color(0xFFF1F5F9),
+                                            unfocusedContainerColor = Color(0xFFF1F5F9),
+                                            focusedBorderColor = Color(0xFF94A3B8),
+                                            unfocusedBorderColor = Color(0xFFCBD5E1),
+                                            focusedLabelColor = Color(0xFF334155),
+                                            unfocusedLabelColor = Color(0xFF334155)
                                         )
                                     )
 
@@ -335,11 +356,15 @@ fun MistriHomeScreen(
                                                         labourMobileInput = ""
                                                         showLabourDialog = true
                                                     },
-                                                    shape = RoundedCornerShape(8.dp)
+                                                    shape = RoundedCornerShape(8.dp),
+                                                    colors = ButtonDefaults.outlinedButtonColors(
+                                                        containerColor = Color.White,
+                                                        contentColor = Color(0xFF0D47A1)
+                                                    )
                                                 ) {
                                                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                                                     Spacer(modifier = Modifier.width(4.dp))
-                                                    Text(Strings.get("add_labour", language), fontSize = 12.sp)
+                                                    Text(Strings.get("add_labour", language), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }
@@ -354,24 +379,26 @@ fun MistriHomeScreen(
                                                 readOnly = true,
                                                 label = { Text(Strings.get("select_labour", language)) },
                                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = labourDropdownExpanded) },
-                                                leadingIcon = { Icon(Icons.Default.Group, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                                                leadingIcon = { Icon(Icons.Default.Group, contentDescription = null, tint = Color(0xFF1565C0)) },
                                                 modifier = Modifier
                                                     .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                                     .fillMaxWidth()
                                                     .testTag("entry_labour_dropdown"),
-                                                shape = RoundedCornerShape(12.dp)
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = fieldColors
                                             )
                                             ExposedDropdownMenu(
                                                 expanded = labourDropdownExpanded,
-                                                onDismissRequest = { labourDropdownExpanded = false }
+                                                onDismissRequest = { labourDropdownExpanded = false },
+                                                containerColor = Color.White
                                             ) {
                                                 mistriLabours.forEach { labour ->
                                                     DropdownMenuItem(
                                                         text = {
                                                             Column {
-                                                                Text(labour.name, fontWeight = FontWeight.Bold)
+                                                                Text(labour.name, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
                                                                 if (labour.mobileNumber.isNotBlank()) {
-                                                                    Text(labour.mobileNumber, fontSize = 11.sp, color = Color.Gray)
+                                                                    Text(labour.mobileNumber, fontSize = 11.sp, color = Color(0xFF475569))
                                                                 }
                                                             }
                                                         },
@@ -392,14 +419,15 @@ fun MistriHomeScreen(
                                         value = workPlaceInput,
                                         onValueChange = { workPlaceInput = it },
                                         label = { Text(Strings.get("workplace_site", language)) },
-                                        placeholder = { Text("e.g. City Mall Tower B, Floor 4") },
+                                        placeholder = { Text("e.g. City Mall Tower B, Floor 4", color = Color(0xFF64748B)) },
                                         leadingIcon = {
-                                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color(0xFF1565C0))
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("entry_workplace_field"),
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = fieldColors
                                     )
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -410,12 +438,13 @@ fun MistriHomeScreen(
                                         onValueChange = { workDateInput = it },
                                         label = { Text(Strings.get("work_date", language)) },
                                         leadingIcon = {
-                                            Icon(Icons.Default.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                            Icon(Icons.Default.CalendarToday, contentDescription = null, tint = Color(0xFF1565C0))
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("entry_date_field"),
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = fieldColors
                                     )
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -425,15 +454,16 @@ fun MistriHomeScreen(
                                         value = shiftDetailsInput,
                                         onValueChange = { shiftDetailsInput = it },
                                         label = { Text(Strings.get("night_shift_details", language)) },
-                                        placeholder = { Text("e.g. 08:00 PM - 04:00 AM (8 hrs) - Shuttering & Casting") },
+                                        placeholder = { Text("e.g. 08:00 PM - 04:00 AM (8 hrs) - Shuttering & Casting", color = Color(0xFF64748B)) },
                                         leadingIcon = {
-                                            Icon(Icons.Default.NightsStay, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                            Icon(Icons.Default.NightsStay, contentDescription = null, tint = Color(0xFF1565C0))
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("entry_details_field"),
                                         minLines = 2,
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = fieldColors
                                     )
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -443,11 +473,12 @@ fun MistriHomeScreen(
                                         value = remarksInput,
                                         onValueChange = { remarksInput = it },
                                         label = { Text(Strings.get("remarks", language)) },
-                                        placeholder = { Text("Optional remarks or progress notes") },
+                                        placeholder = { Text("Optional remarks or progress notes", color = Color(0xFF64748B)) },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("entry_remarks_field"),
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = fieldColors
                                     )
 
                                     Spacer(modifier = Modifier.height(20.dp))
@@ -489,12 +520,16 @@ fun MistriHomeScreen(
                                             .height(50.dp)
                                             .testTag("submit_shift_entry_button"),
                                         shape = RoundedCornerShape(12.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color(0xFF1565C0),
+                                            contentColor = Color.White
+                                        )
                                     ) {
                                         Text(
                                             text = Strings.get("submit_entry", language),
                                             fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
                                         )
                                     }
                                 }
@@ -570,7 +605,7 @@ fun MistriHomeScreen(
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Text(
                                         text = Strings.get("no_entries_found", language),
-                                        color = Color(0xFF64748B),
+                                        color = Color(0xFF475569),
                                         fontWeight = FontWeight.Medium
                                     )
                                 }
@@ -598,6 +633,7 @@ fun MistriHomeScreen(
                 2 -> {
                     // TAB 2: LABOUR MANAGEMENT FOR CURRENT MISTRI
                     Scaffold(
+                        containerColor = Color(0xFFF8FAFC),
                         floatingActionButton = {
                             FloatingActionButton(
                                 onClick = {
@@ -606,7 +642,7 @@ fun MistriHomeScreen(
                                     labourMobileInput = ""
                                     showLabourDialog = true
                                 },
-                                containerColor = MaterialTheme.colorScheme.primary,
+                                containerColor = Color(0xFF1565C0),
                                 contentColor = Color.White,
                                 modifier = Modifier.testTag("fab_add_labour")
                             ) {
@@ -636,7 +672,7 @@ fun MistriHomeScreen(
                                 Text(
                                     text = "${mistriLabours.size} ${Strings.get("total_labours", language)}",
                                     style = MaterialTheme.typography.labelMedium.copy(
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color(0xFF0D47A1),
                                         fontWeight = FontWeight.Bold
                                     )
                                 )
@@ -655,13 +691,13 @@ fun MistriHomeScreen(
                                         Icon(
                                             imageVector = Icons.Default.Group,
                                             contentDescription = null,
-                                            tint = Color(0xFF94A3B8),
+                                            tint = Color(0xFF64748B),
                                             modifier = Modifier.size(54.dp)
                                         )
                                         Spacer(modifier = Modifier.height(10.dp))
                                         Text(
                                             text = Strings.get("no_labours_found", language),
-                                            color = Color(0xFF64748B),
+                                            color = Color(0xFF475569),
                                             fontWeight = FontWeight.Medium
                                         )
                                         Spacer(modifier = Modifier.height(12.dp))
@@ -673,7 +709,7 @@ fun MistriHomeScreen(
                                                 showLabourDialog = true
                                             }
                                         ) {
-                                            Text(Strings.get("add_labour", language))
+                                            Text(Strings.get("add_labour", language), color = Color.White)
                                         }
                                     }
                                 }
@@ -709,11 +745,15 @@ fun MistriHomeScreen(
     if (showLabourDialog) {
         AlertDialog(
             onDismissRequest = { showLabourDialog = false },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
             title = {
                 Text(
                     text = if (editingLabour == null) Strings.get("add_labour", language)
                            else Strings.get("edit_labour", language),
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
                 )
             },
             text = {
@@ -726,7 +766,8 @@ fun MistriHomeScreen(
                             .fillMaxWidth()
                             .testTag("dialog_labour_name_input"),
                         singleLine = true,
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        colors = fieldColors
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     OutlinedTextField(
@@ -738,7 +779,8 @@ fun MistriHomeScreen(
                             .fillMaxWidth()
                             .testTag("dialog_labour_phone_input"),
                         singleLine = true,
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        colors = fieldColors
                     )
                 }
             },
@@ -760,12 +802,12 @@ fun MistriHomeScreen(
                     },
                     modifier = Modifier.testTag("dialog_save_labour_button")
                 ) {
-                    Text(Strings.get("save", language))
+                    Text(Strings.get("save", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLabourDialog = false }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -780,41 +822,48 @@ fun MistriHomeScreen(
 
         AlertDialog(
             onDismissRequest = { editingEntry = null },
-            title = { Text(Strings.get("update_entry", language), fontWeight = FontWeight.Bold) },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = { Text(Strings.get("update_entry", language), fontWeight = FontWeight.Bold, color = Color(0xFF0F172A)) },
             text = {
                 Column {
                     Text(
                         text = "${Strings.get("labour_name", language)}: ${entry.labourName}",
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color(0xFF0D47A1)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     OutlinedTextField(
                         value = editPlace,
                         onValueChange = { editPlace = it },
                         label = { Text(Strings.get("workplace_site", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = fieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = editDate,
                         onValueChange = { editDate = it },
                         label = { Text(Strings.get("work_date", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = fieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = editDetails,
                         onValueChange = { editDetails = it },
                         label = { Text(Strings.get("night_shift_details", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = fieldColors
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = editRemarks,
                         onValueChange = { editRemarks = it },
                         label = { Text(Strings.get("remarks", language)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = fieldColors
                     )
                 }
             },
@@ -836,12 +885,12 @@ fun MistriHomeScreen(
                         )
                     }
                 ) {
-                    Text(Strings.get("save", language))
+                    Text(Strings.get("save", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { editingEntry = null }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -851,8 +900,11 @@ fun MistriHomeScreen(
     itemToDelete?.let { entry ->
         AlertDialog(
             onDismissRequest = { itemToDelete = null },
-            title = { Text(Strings.get("delete", language), fontWeight = FontWeight.Bold) },
-            text = { Text(Strings.get("confirm_delete", language)) },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = { Text(Strings.get("delete", language), fontWeight = FontWeight.Bold, color = Color(0xFFB71C1C)) },
+            text = { Text(Strings.get("confirm_delete", language), color = Color(0xFF1E293B)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -861,12 +913,12 @@ fun MistriHomeScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text(Strings.get("delete", language))
+                    Text(Strings.get("delete", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { itemToDelete = null }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -876,8 +928,11 @@ fun MistriHomeScreen(
     labourToDelete?.let { labour ->
         AlertDialog(
             onDismissRequest = { labourToDelete = null },
-            title = { Text(Strings.get("delete", language), fontWeight = FontWeight.Bold) },
-            text = { Text(Strings.get("confirm_delete", language)) },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
+            title = { Text(Strings.get("delete_labour", language), fontWeight = FontWeight.Bold, color = Color(0xFFB71C1C)) },
+            text = { Text("${labour.name}\n\n${Strings.get("confirm_delete_labour", language)}", color = Color(0xFF1E293B)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -886,12 +941,12 @@ fun MistriHomeScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text(Strings.get("delete", language))
+                    Text(Strings.get("delete", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { labourToDelete = null }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )
@@ -924,7 +979,7 @@ fun ShiftEntryCard(
                 // Date Badge
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = Color(0xFFDBEAFE)
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -933,7 +988,7 @@ fun ShiftEntryCard(
                         Icon(
                             imageVector = Icons.Default.CalendarToday,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = Color(0xFF0D47A1),
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -941,7 +996,7 @@ fun ShiftEntryCard(
                             text = entry.workDate,
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = Color(0xFF0D47A1)
                             )
                         )
                     }
@@ -968,7 +1023,7 @@ fun ShiftEntryCard(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "${Strings.get("labour_name", language)}: ",
-                    style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF64748B))
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF475569))
                 )
                 Text(
                     text = entry.labourName,
@@ -979,15 +1034,15 @@ fun ShiftEntryCard(
             if (showMistriName) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF1565C0), modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "${Strings.get("mistri_name", language)}: ",
-                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF64748B))
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF475569))
                     )
                     Text(
                         text = entry.mistriName,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold, color = Color(0xFF1E293B))
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A))
                     )
                 }
             }
@@ -998,26 +1053,26 @@ fun ShiftEntryCard(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = entry.workPlace,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF1E293B), fontWeight = FontWeight.Medium)
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF0F172A), fontWeight = FontWeight.Medium)
                 )
             }
 
             Spacer(modifier = Modifier.height(6.dp))
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = Color(0xFFF8FAFC),
+                color = Color(0xFFF1F5F9),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = entry.shiftDetails,
-                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF334155))
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF1E293B))
                     )
                     if (entry.remarks.isNotBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "${Strings.get("remarks", language)}: ${entry.remarks}",
-                            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF64748B))
+                            style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF475569))
                         )
                     }
                 }
@@ -1047,7 +1102,10 @@ fun LabourCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
                         .size(42.dp)
@@ -1074,11 +1132,11 @@ fun LabourCard(
                     if (labour.mobileNumber.isNotBlank()) {
                         Spacer(modifier = Modifier.height(2.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF64748B), modifier = Modifier.size(12.dp))
+                            Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF475569), modifier = Modifier.size(12.dp))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = labour.mobileNumber,
-                                style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF64748B))
+                                style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF475569))
                             )
                         }
                     }
@@ -1089,7 +1147,12 @@ fun LabourCard(
                 IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color(0xFF0288D1), modifier = Modifier.size(18.dp))
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .testTag("mistri_delete_labour_${labour.id}")
+                ) {
                     Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
                 }
             }

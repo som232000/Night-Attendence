@@ -145,7 +145,7 @@ fun AuthScreen(
                 Text(
                     text = Strings.get("app_subtitle", language),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        color = Color(0xFF64748B)
+                        color = Color(0xFF475569)
                     )
                 )
 
@@ -184,7 +184,7 @@ fun AuthScreen(
                     indicator = { tabPositions ->
                         TabRowDefaults.SecondaryIndicator(
                             Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color(0xFF0D47A1)
                         )
                     },
                     modifier = Modifier.clip(RoundedCornerShape(12.dp))
@@ -195,17 +195,21 @@ fun AuthScreen(
                             selectedTab = 0
                             errorMessage = null
                         },
+                        selectedContentColor = Color(0xFF0D47A1),
+                        unselectedContentColor = Color(0xFF334155),
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.Engineering,
                                     contentDescription = null,
+                                    tint = if (selectedTab == 0) Color(0xFF0D47A1) else Color(0xFF334155),
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     Strings.get("mistri_panel", language),
-                                    fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal
+                                    color = if (selectedTab == 0) Color(0xFF0D47A1) else Color(0xFF334155),
+                                    fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium
                                 )
                             }
                         },
@@ -217,17 +221,21 @@ fun AuthScreen(
                             selectedTab = 1
                             errorMessage = null
                         },
+                        selectedContentColor = Color(0xFF0D47A1),
+                        unselectedContentColor = Color(0xFF334155),
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.AdminPanelSettings,
                                     contentDescription = null,
+                                    tint = if (selectedTab == 1) Color(0xFF0D47A1) else Color(0xFF334155),
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     Strings.get("admin_panel", language),
-                                    fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal
+                                    color = if (selectedTab == 1) Color(0xFF0D47A1) else Color(0xFF334155),
+                                    fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium
                                 )
                             }
                         },
@@ -258,6 +266,18 @@ fun AuthScreen(
                     }
                 }
 
+                val highContrastFieldColors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color(0xFF0F172A),
+                    unfocusedTextColor = Color(0xFF0F172A),
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedBorderColor = Color(0xFF1565C0),
+                    unfocusedBorderColor = Color(0xFF94A3B8),
+                    focusedLabelColor = Color(0xFF1565C0),
+                    unfocusedLabelColor = Color(0xFF334155),
+                    cursorColor = Color(0xFF1565C0)
+                )
+
                 // ADMIN PANEL FORM
                 if (selectedTab == 1) {
                     Text(
@@ -276,13 +296,14 @@ fun AuthScreen(
                         onValueChange = { adminUser = it },
                         label = { Text(Strings.get("user_id", language)) },
                         leadingIcon = {
-                            Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF1565C0))
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("admin_user_input"),
                         singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = highContrastFieldColors
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -292,13 +313,14 @@ fun AuthScreen(
                         onValueChange = { adminPass = it },
                         label = { Text(Strings.get("password", language)) },
                         leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF1565C0))
                         },
                         trailingIcon = {
                             IconButton(onClick = { adminPassVisible = !adminPassVisible }) {
                                 Icon(
                                     imageVector = if (adminPassVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = "Toggle password"
+                                    contentDescription = "Toggle password",
+                                    tint = Color(0xFF475569)
                                 )
                             }
                         },
@@ -308,7 +330,8 @@ fun AuthScreen(
                             .fillMaxWidth()
                             .testTag("admin_password_input"),
                         singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = highContrastFieldColors
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -354,7 +377,10 @@ fun AuthScreen(
                             .height(50.dp)
                             .testTag("admin_login_button"),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1565C0),
+                            contentColor = Color.White
+                        )
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
@@ -366,7 +392,8 @@ fun AuthScreen(
                             Text(
                                 text = Strings.get("login", language),
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
                         }
                     }
@@ -391,14 +418,15 @@ fun AuthScreen(
                             onValueChange = { if (it.length <= 15) mistriMobile = it },
                             label = { Text(Strings.get("mobile_number", language)) },
                             leadingIcon = {
-                                Icon(Icons.Default.Phone, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF1565C0))
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("mistri_mobile_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = highContrastFieldColors
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -408,13 +436,14 @@ fun AuthScreen(
                             onValueChange = { mistriPass = it },
                             label = { Text(Strings.get("password", language)) },
                             leadingIcon = {
-                                Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF1565C0))
                             },
                             trailingIcon = {
                                 IconButton(onClick = { mistriPassVisible = !mistriPassVisible }) {
                                     Icon(
                                         imageVector = if (mistriPassVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                        contentDescription = "Toggle password"
+                                        contentDescription = "Toggle password",
+                                        tint = Color(0xFF475569)
                                     )
                                 }
                             },
@@ -424,7 +453,8 @@ fun AuthScreen(
                                 .fillMaxWidth()
                                 .testTag("mistri_password_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = highContrastFieldColors
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
@@ -456,7 +486,10 @@ fun AuthScreen(
                                 .height(50.dp)
                                 .testTag("mistri_login_button"),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF1565C0),
+                                contentColor = Color.White
+                            )
                         ) {
                             if (isLoading) {
                                 CircularProgressIndicator(
@@ -468,7 +501,8 @@ fun AuthScreen(
                                 Text(
                                     text = Strings.get("login", language),
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
                                 )
                             }
                         }
@@ -484,7 +518,7 @@ fun AuthScreen(
                         ) {
                             Text(
                                 text = Strings.get("dont_have_account", language),
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color(0xFF0D47A1),
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -507,13 +541,14 @@ fun AuthScreen(
                             onValueChange = { mistriName = it },
                             label = { Text(Strings.get("full_name", language)) },
                             leadingIcon = {
-                                Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF1565C0))
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("register_name_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = highContrastFieldColors
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -523,14 +558,15 @@ fun AuthScreen(
                             onValueChange = { if (it.length <= 15) mistriMobile = it },
                             label = { Text(Strings.get("mobile_number", language)) },
                             leadingIcon = {
-                                Icon(Icons.Default.Phone, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF1565C0))
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("register_mobile_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = highContrastFieldColors
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -540,7 +576,16 @@ fun AuthScreen(
                             onValueChange = { mistriPass = it },
                             label = { Text(Strings.get("password", language)) },
                             leadingIcon = {
-                                Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF1565C0))
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = { mistriPassVisible = !mistriPassVisible }) {
+                                    Icon(
+                                        imageVector = if (mistriPassVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                        contentDescription = "Toggle password",
+                                        tint = Color(0xFF475569)
+                                    )
+                                }
                             },
                             visualTransformation = if (mistriPassVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -548,7 +593,8 @@ fun AuthScreen(
                                 .fillMaxWidth()
                                 .testTag("register_password_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = highContrastFieldColors
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -558,7 +604,7 @@ fun AuthScreen(
                             onValueChange = { mistriConfirmPass = it },
                             label = { Text(Strings.get("confirm_password", language)) },
                             leadingIcon = {
-                                Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF1565C0))
                             },
                             visualTransformation = if (mistriPassVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -566,7 +612,8 @@ fun AuthScreen(
                                 .fillMaxWidth()
                                 .testTag("register_confirm_password_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = highContrastFieldColors
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
@@ -603,7 +650,10 @@ fun AuthScreen(
                                 .height(50.dp)
                                 .testTag("register_submit_button"),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF1565C0),
+                                contentColor = Color.White
+                            )
                         ) {
                             if (isLoading) {
                                 CircularProgressIndicator(
@@ -615,7 +665,8 @@ fun AuthScreen(
                                 Text(
                                     text = Strings.get("register", language),
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
                                 )
                             }
                         }
@@ -631,7 +682,7 @@ fun AuthScreen(
                         ) {
                             Text(
                                 text = Strings.get("already_have_account", language),
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color(0xFF0D47A1),
                                 fontWeight = FontWeight.SemiBold
                             )
                         }

@@ -123,7 +123,12 @@ object FirestoreSyncManager {
                         val createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis()
 
                         val existing = repository.getMistriByMobile(mobile)
-                        if (existing == null) {
+                        if (change.type == DocumentChange.Type.REMOVED) {
+                            if (existing != null) {
+                                repository.deleteMistri(existing)
+                                Log.d(TAG, "Deleted mistri removed from cloud: $mobile")
+                            }
+                        } else if (existing == null) {
                             repository.insertDirectMistri(
                                 MistriEntity(
                                     id = 0L,
@@ -363,14 +368,20 @@ object FirestoreSyncManager {
 
     private suspend fun seedCloudIfEmpty(context: Context, repository: NightShiftRepository) {
         val db = getFirestore(context)
+        val seedDoc = db.collection("admins").document("seed_status").get().await()
+        _isCloudConnected.value = true
+        if (seedDoc.exists()) return
+
         val existingMistris = db.collection("mistris").limit(1).get().await()
         val existingEntries = db.collection("night_shift_entries").limit(1).get().await()
-        _isCloudConnected.value = true
 
         // Only push initial seed data if Firestore database is completely fresh/empty
         if (existingMistris.isEmpty && existingEntries.isEmpty) {
             uploadExistingLocalDataToCloud(context, repository)
         }
+        db.collection("admins").document("seed_status")
+            .set(hashMapOf("seeded" to true, "seededAt" to System.currentTimeMillis()))
+            .await()
     }
 
     /**
@@ -632,6 +643,26 @@ object FirestoreSyncManager {
             Log.d(TAG, "Pushed Labour to Firestore: $docKey")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to push labour", e)
+        }
+    }
+
+    suspend fun deleteMistri(
+        context: Context,
+        mistri: MistriEntity,
+        labours: List<LabourEntity>
+    ) {
+        try {
+            val db = getFirestore(context)
+            for (l in labours) {
+                val docKey = l.cloudId.ifBlank { "${mistri.mobileNumber}_${l.name.replace(" ", "_")}" }
+                db.collection("labours").document(docKey).delete().await()
+            }
+            db.collection("mistris").document(mistri.mobileNumber).delete().await()
+            _isCloudConnected.value = true
+            _lastSyncTime.value = System.currentTimeMillis()
+            Log.d(TAG, "Deleted Mistri from Firestore: ${mistri.mobileNumber}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to delete mistri from Firestore", e)
         }
     }
 

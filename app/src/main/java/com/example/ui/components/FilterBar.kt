@@ -100,14 +100,14 @@ fun FilterBar(
                 Text(
                     text = Strings.get("search_hint", language),
                     fontSize = 13.sp,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFF475569)
                 )
             },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color(0xFF1565C0)
                 )
             },
             trailingIcon = {
@@ -116,7 +116,7 @@ fun FilterBar(
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Clear",
-                            tint = Color.Gray
+                            tint = Color(0xFF475569)
                         )
                     }
                 }
@@ -124,14 +124,26 @@ fun FilterBar(
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color(0xFF0F172A),
+                unfocusedTextColor = Color(0xFF0F172A),
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color(0xFFCBD5E1)
+                focusedBorderColor = Color(0xFF1565C0),
+                unfocusedBorderColor = Color(0xFF94A3B8),
+                cursorColor = Color(0xFF1565C0)
             )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        val chipColors = FilterChipDefaults.filterChipColors(
+            containerColor = Color.White,
+            labelColor = Color(0xFF0F172A),
+            iconColor = Color(0xFF1565C0),
+            selectedContainerColor = Color(0xFFDBEAFE),
+            selectedLabelColor = Color(0xFF0D47A1),
+            selectedLeadingIconColor = Color(0xFF0D47A1)
+        )
 
         // Horizontal filter chips
         Row(
@@ -155,7 +167,7 @@ fun FilterBar(
                                 else -> selectedDate
                             },
                             fontSize = 12.sp,
-                            fontWeight = if (selectedDate != null) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (selectedDate != null) FontWeight.Bold else FontWeight.Medium
                         )
                     },
                     leadingIcon = {
@@ -171,36 +183,34 @@ fun FilterBar(
                                 onClick = { onDateSelected(null) },
                                 modifier = Modifier.size(16.dp)
                             ) {
-                                Icon(Icons.Default.Clear, contentDescription = "Clear date", tint = Color.Gray)
+                                Icon(Icons.Default.Clear, contentDescription = "Clear date", tint = Color(0xFF475569))
                             }
                         }
                     },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color(0xFFE0F2FE),
-                        selectedLabelColor = Color(0xFF0369A1)
-                    )
+                    colors = chipColors
                 )
 
                 DropdownMenu(
                     expanded = dateMenuExpanded,
-                    onDismissRequest = { dateMenuExpanded = false }
+                    onDismissRequest = { dateMenuExpanded = false },
+                    containerColor = Color.White
                 ) {
                     DropdownMenuItem(
-                        text = { Text(Strings.get("all_dates", language)) },
+                        text = { Text(Strings.get("all_dates", language), color = Color(0xFF0F172A)) },
                         onClick = {
                             onDateSelected(null)
                             dateMenuExpanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("${Strings.get("today", language)} ($todayDate)") },
+                        text = { Text("${Strings.get("today", language)} ($todayDate)", color = Color(0xFF0F172A)) },
                         onClick = {
                             onDateSelected(todayDate)
                             dateMenuExpanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("${Strings.get("yesterday", language)} ($yesterdayDate)") },
+                        text = { Text("${Strings.get("yesterday", language)} ($yesterdayDate)", color = Color(0xFF0F172A)) },
                         onClick = {
                             onDateSelected(yesterdayDate)
                             dateMenuExpanded = false
@@ -209,9 +219,9 @@ fun FilterBar(
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.EditCalendar, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.EditCalendar, contentDescription = null, tint = Color(0xFF1565C0), modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(Strings.get("pick_date", language))
+                                Text(Strings.get("pick_date", language), color = Color(0xFF0F172A))
                             }
                         },
                         onClick = {
@@ -232,7 +242,8 @@ fun FilterBar(
                         Text(
                             text = if (selectedMonth == null) Strings.get("all_months", language)
                                    else selectedMonth,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedMonth != null) FontWeight.Bold else FontWeight.Medium
                         )
                     },
                     leadingIcon = {
@@ -248,21 +259,19 @@ fun FilterBar(
                                 onClick = { onMonthSelected(null) },
                                 modifier = Modifier.size(16.dp)
                             ) {
-                                Icon(Icons.Default.Clear, contentDescription = "Clear month", tint = Color.Gray)
+                                Icon(Icons.Default.Clear, contentDescription = "Clear month", tint = Color(0xFF475569))
                             }
                         }
                     },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.primary
-                    )
+                    colors = chipColors
                 )
                 DropdownMenu(
                     expanded = monthMenuExpanded,
-                    onDismissRequest = { monthMenuExpanded = false }
+                    onDismissRequest = { monthMenuExpanded = false },
+                    containerColor = Color.White
                 ) {
                     DropdownMenuItem(
-                        text = { Text(Strings.get("all_months", language)) },
+                        text = { Text(Strings.get("all_months", language), color = Color(0xFF0F172A)) },
                         onClick = {
                             onMonthSelected(null)
                             monthMenuExpanded = false
@@ -270,7 +279,7 @@ fun FilterBar(
                     )
                     availableMonths.forEach { month ->
                         DropdownMenuItem(
-                            text = { Text(month) },
+                            text = { Text(month, color = Color(0xFF0F172A)) },
                             onClick = {
                                 onMonthSelected(month)
                                 monthMenuExpanded = false
@@ -290,7 +299,8 @@ fun FilterBar(
                         label = {
                             Text(
                                 text = currentMistriName ?: Strings.get("all_mistris", language),
-                                fontSize = 12.sp
+                                fontSize = 12.sp,
+                                fontWeight = if (selectedMistriId != null) FontWeight.Bold else FontWeight.Medium
                             )
                         },
                         leadingIcon = {
@@ -306,21 +316,19 @@ fun FilterBar(
                                     onClick = { onMistriSelected(null) },
                                     modifier = Modifier.size(16.dp)
                                 ) {
-                                    Icon(Icons.Default.Clear, contentDescription = "Clear mistri", tint = Color.Gray)
+                                    Icon(Icons.Default.Clear, contentDescription = "Clear mistri", tint = Color(0xFF475569))
                                 }
                             }
                         },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.secondary
-                        )
+                        colors = chipColors
                     )
                     DropdownMenu(
                         expanded = mistriMenuExpanded,
-                        onDismissRequest = { mistriMenuExpanded = false }
+                        onDismissRequest = { mistriMenuExpanded = false },
+                        containerColor = Color.White
                     ) {
                         DropdownMenuItem(
-                            text = { Text(Strings.get("all_mistris", language)) },
+                            text = { Text(Strings.get("all_mistris", language), color = Color(0xFF0F172A)) },
                             onClick = {
                                 onMistriSelected(null)
                                 mistriMenuExpanded = false
@@ -328,7 +336,7 @@ fun FilterBar(
                         )
                         mistris.forEach { mistri ->
                             DropdownMenuItem(
-                                text = { Text(mistri.fullName) },
+                                text = { Text(mistri.fullName, color = Color(0xFF0F172A)) },
                                 onClick = {
                                     onMistriSelected(mistri.id)
                                     mistriMenuExpanded = false
@@ -345,10 +353,14 @@ fun FilterBar(
     if (showCustomDateDialog) {
         AlertDialog(
             onDismissRequest = { showCustomDateDialog = false },
+            containerColor = Color.White,
+            titleContentColor = Color(0xFF0F172A),
+            textContentColor = Color(0xFF1E293B),
             title = {
                 Text(
                     text = Strings.get("pick_date", language),
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
                 )
             },
             text = {
@@ -356,7 +368,7 @@ fun FilterBar(
                     Text(
                         text = "Enter or edit date (YYYY-MM-DD):",
                         fontSize = 13.sp,
-                        color = Color(0xFF64748B)
+                        color = Color(0xFF475569)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -365,7 +377,17 @@ fun FilterBar(
                         label = { Text("YYYY-MM-DD") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color(0xFF0F172A),
+                            unfocusedTextColor = Color(0xFF0F172A),
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedBorderColor = Color(0xFF1565C0),
+                            unfocusedBorderColor = Color(0xFF94A3B8),
+                            focusedLabelColor = Color(0xFF1565C0),
+                            unfocusedLabelColor = Color(0xFF334155)
+                        )
                     )
                 }
             },
@@ -378,12 +400,12 @@ fun FilterBar(
                         showCustomDateDialog = false
                     }
                 ) {
-                    Text(Strings.get("save", language))
+                    Text(Strings.get("save", language), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCustomDateDialog = false }) {
-                    Text(Strings.get("cancel", language))
+                    Text(Strings.get("cancel", language), color = Color(0xFF334155))
                 }
             }
         )

@@ -101,7 +101,11 @@ object Strings {
         "import_backup" to "Import / Restore Backup",
         "all_device_info" to "Admin can view all entries from any phone or device.",
         "cloud_online" to "Cloud Online (Live Realtime Sync)",
-        "cloud_synced_desc" to "All data is securely synced across all phones in real-time."
+        "cloud_synced_desc" to "All data is securely synced across all phones in real-time.",
+        "delete_mistri" to "Delete Mistri",
+        "confirm_delete_mistri" to "Are you sure you want to delete this Mistri and all their labours?",
+        "delete_labour" to "Delete Labour",
+        "confirm_delete_labour" to "Are you sure you want to delete this labour?"
     )
 
     private val bengaliStrings = mapOf(
@@ -194,6 +198,10 @@ object Strings {
         "import_backup" to "ব্যাকআপ ফাইল যুক্ত / রিস্টোর",
         "all_device_info" to "যেকোনো ডিভাইসে অ্যাপ ইন্সটল করে অ্যাডমিন সব মিস্ত্রির ডেটা দেখতে পারবেন।",
         "cloud_online" to "অনলাইন ক্লাউড (লাইভ রিয়েলটাইম সিঙ্ক সক্রিয়)",
-        "cloud_synced_desc" to "সব ফোনের ডেটা ক্লাউডে লাইভ সিঙ্ক হচ্ছে, অ্যাডমিন তাৎক্ষণিক দেখতে পাবেন।"
+        "cloud_synced_desc" to "সব ফোনের ডেটা ক্লাউডে লাইভ সিঙ্ক হচ্ছে, অ্যাডমিন তাৎক্ষণিক দেখতে পাবেন।",
+        "delete_mistri" to "মিস্ত্রি ডিলিট করুন",
+        "confirm_delete_mistri" to "আপনি কি নিশ্চিত এই মিস্ত্রি এবং তাঁর অধীনে থাকা সমস্ত লেবার ডিলিট করতে চান?",
+        "delete_labour" to "লেবার ডিলিট করুন",
+        "confirm_delete_labour" to "আপনি কি নিশ্চিত এই লেবারকে ডিলিট করতে চান?"
     )
 }

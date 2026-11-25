@@ -75,6 +75,14 @@ class NightShiftRepository(private val database: AppDatabase) {
         mistriDao.updateMistri(mistri)
     }
 
+    suspend fun deleteMistri(mistri: MistriEntity) {
+        labourDao.deleteLaboursByMistri(mistri.id)
+        mistriDao.deleteMistri(mistri)
+    }
+
+    suspend fun getLaboursListByMistri(mistriId: Long): List<LabourEntity> =
+        labourDao.getLaboursListByMistri(mistriId)
+
     suspend fun getMistriByMobile(mobile: String): MistriEntity? = mistriDao.getMistriByMobile(mobile.trim())
     suspend fun getMistriById(id: Long): MistriEntity? = mistriDao.getMistriById(id)
     suspend fun insertDirectMistri(mistri: MistriEntity): Long = mistriDao.insertMistri(mistri)

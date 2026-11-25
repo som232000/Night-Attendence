@@ -277,6 +277,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteMistri(mistri: MistriEntity) {
+        viewModelScope.launch {
+            val labours = repository.getLaboursListByMistri(mistri.id)
+            repository.deleteMistri(mistri)
+            if (_currentMistri.value?.id == mistri.id) {
+                logout()
+            }
+            _toastEvent.emit("Mistri deleted")
+            launch {
+                FirestoreSyncManager.deleteMistri(getApplication(), mistri, labours)
+            }
+        }
+    }
+
     // LABOUR ACTIONS
     fun saveLabour(name: String, mobile: String, labourId: Long = 0, onSuccess: () -> Unit) {
         val mistri = _currentMistri.value ?: return

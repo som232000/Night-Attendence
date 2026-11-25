@@ -85,7 +85,7 @@ fun StatCard(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF334155),
+                    color = Color(0xFF1E293B),
                     fontSize = 13.sp
                 ),
                 maxLines = 1
@@ -95,7 +95,7 @@ fun StatCard(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.labelSmall.copy(
-                        color = Color(0xFF64748B),
+                        color = Color(0xFF475569),
                         fontSize = 11.sp
                     )
                 )

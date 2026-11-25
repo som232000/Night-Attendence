@@ -27,7 +27,7 @@ import java.util.Locale
         NightShiftEntryEntity::class,
         AdminEntity::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -97,13 +97,13 @@ abstract class AppDatabase : RoomDatabase() {
             )
 
             // Initial Sample Labours for Rajesh
-            val l1 = labourDao.insertLabour(LabourEntity(mistriId = sampleMistriId, name = "Bikash Mondal", mobileNumber = "9800112233"))
-            val l2 = labourDao.insertLabour(LabourEntity(mistriId = sampleMistriId, name = "Sunil Sardar", mobileNumber = "9800223344"))
-            val l3 = labourDao.insertLabour(LabourEntity(mistriId = sampleMistriId, name = "Tarun Roy", mobileNumber = "9800334455"))
+            val l1 = labourDao.insertLabour(LabourEntity(cloudId = "sample_labour_1", mistriId = sampleMistriId, name = "Bikash Mondal", mobileNumber = "9800112233"))
+            val l2 = labourDao.insertLabour(LabourEntity(cloudId = "sample_labour_2", mistriId = sampleMistriId, name = "Sunil Sardar", mobileNumber = "9800223344"))
+            val l3 = labourDao.insertLabour(LabourEntity(cloudId = "sample_labour_3", mistriId = sampleMistriId, name = "Tarun Roy", mobileNumber = "9800334455"))
 
             // Initial Sample Labours for Anisur
-            val l4 = labourDao.insertLabour(LabourEntity(mistriId = sampleMistri2Id, name = "Kalam Sheikh", mobileNumber = "9700112233"))
-            val l5 = labourDao.insertLabour(LabourEntity(mistriId = sampleMistri2Id, name = "Raju Mallick", mobileNumber = "9700223344"))
+            val l4 = labourDao.insertLabour(LabourEntity(cloudId = "sample_labour_4", mistriId = sampleMistri2Id, name = "Kalam Sheikh", mobileNumber = "9700112233"))
+            val l5 = labourDao.insertLabour(LabourEntity(cloudId = "sample_labour_5", mistriId = sampleMistri2Id, name = "Raju Mallick", mobileNumber = "9700223344"))
 
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val today = dateFormat.format(Date())
@@ -111,6 +111,7 @@ abstract class AppDatabase : RoomDatabase() {
             // Sample Shifts
             shiftDao.insertEntry(
                 NightShiftEntryEntity(
+                    cloudId = "sample_entry_1",
                     mistriId = sampleMistriId,
                     mistriName = "Rajesh Sharma (Mistri)",
                     labourId = l1,
@@ -124,6 +125,7 @@ abstract class AppDatabase : RoomDatabase() {
 
             shiftDao.insertEntry(
                 NightShiftEntryEntity(
+                    cloudId = "sample_entry_2",
                     mistriId = sampleMistriId,
                     mistriName = "Rajesh Sharma (Mistri)",
                     labourId = l2,
@@ -137,6 +139,7 @@ abstract class AppDatabase : RoomDatabase() {
 
             shiftDao.insertEntry(
                 NightShiftEntryEntity(
+                    cloudId = "sample_entry_3",
                     mistriId = sampleMistri2Id,
                     mistriName = "Anisur Rahman (Mistri)",
                     labourId = l4,

@@ -238,6 +238,40 @@ fun MistriHomeScreen(
                         }
 
                         item {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = Color(0xFFE8F5E9),
+                                shape = RoundedCornerShape(8.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF81C784))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(Color(0xFF2E7D32), CircleShape)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = Strings.get("cloud_online", language),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1B5E20)
+                                    )
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Text(
+                                        text = Strings.get("cloud_synced_desc", language),
+                                        fontSize = 9.sp,
+                                        color = Color(0xFF2E7D32),
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+
+                        item {
                             // Entry Form Card
                             Card(
                                 modifier = Modifier

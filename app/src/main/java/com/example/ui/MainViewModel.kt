@@ -10,6 +10,7 @@ import com.example.data.local.entity.MistriEntity
 import com.example.data.local.entity.NightShiftEntryEntity
 import com.example.data.repository.NightShiftRepository
 import com.example.util.AppLanguage
+import com.example.util.FirestoreSyncManager
 import com.example.util.OnlineSyncManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,20 +37,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         val database = AppDatabase.getDatabase(application, viewModelScope)
         repository = NightShiftRepository(database)
-        // Automatically start real-time continuous online cloud sync across all devices
-        startContinuousCloudSync()
+        // Automatically start real-time continuous Cloud Firestore synchronization across all devices
+        FirestoreSyncManager.startRealtimeSync(application, repository, viewModelScope)
     }
 
-    private fun startContinuousCloudSync() {
-        viewModelScope.launch {
-            while (true) {
-                try {
-                    OnlineSyncManager.syncFromCloud(repository)
-                } catch (_: Exception) {}
-                kotlinx.coroutines.delay(8000L) // Polls online cloud every 8 seconds for real-time entries
-            }
-        }
-    }
+    val isCloudConnected: StateFlow<Boolean> = FirestoreSyncManager.isCloudConnected
+    val lastSyncTime: StateFlow<Long> = FirestoreSyncManager.lastSyncTime
 
     // Language state
     private val _language = MutableStateFlow(AppLanguage.BENGALI) // Bengali by default as requested
@@ -188,7 +181,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // AUTH ACTIONS
     fun loginAdmin(user: String, pass: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            val success = repository.authenticateAdmin(user.trim(), pass)
+            val success = FirestoreSyncManager.verifyAdminLoginOnline(
+                context = getApplication(),
+                repository = repository,
+                username = user.trim(),
+                pass = pass
+            )
             if (success) {
                 _userRole.value = UserRole.ADMIN
                 _currentMistri.value = null
@@ -202,14 +200,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun updateAdminPassword(newUsername: String, newPass: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             repository.updateAdminCredentials(newUsername, newPass)
-            _toastEvent.emit("Admin credentials updated successfully")
+            launch {
+                FirestoreSyncManager.pushAdminCredentials(
+                    getApplication(),
+                    com.example.data.local.entity.AdminEntity(newUsername.trim(), newPass)
+                )
+            }
+            _toastEvent.emit("Admin credentials updated & synced online!")
             onSuccess()
         }
     }
 
     fun loginMistri(mobile: String, pass: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            val result = repository.loginMistri(mobile, pass)
+            val result = FirestoreSyncManager.verifyMistriLoginOnline(
+                context = getApplication(),
+                repository = repository,
+                mobile = mobile,
+                pass = pass
+            )
             result.onSuccess { mistri ->
                 _currentMistri.value = mistri
                 _userRole.value = UserRole.MISTRI
@@ -228,14 +237,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
-            val result = repository.registerMistri(name, mobile, pass)
+            val result = FirestoreSyncManager.registerMistriOnline(
+                context = getApplication(),
+                repository = repository,
+                fullName = name,
+                mobile = mobile,
+                pass = pass
+            )
             result.onSuccess { mistri ->
                 _currentMistri.value = mistri
                 _userRole.value = UserRole.MISTRI
-                // Push update to cloud so Admin can see new Mistri on another device
-                launch {
-                    try { OnlineSyncManager.syncToCloud(repository) } catch (_: Exception) {}
-                }
                 onSuccess(mistri)
             }.onFailure { ex ->
                 onError(ex.message ?: "Registration failed")
@@ -257,8 +268,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.updateMistriStatus(mistriId, !currentStatus)
             _toastEvent.emit(if (!currentStatus) "Mistri account activated" else "Mistri account deactivated")
-            launch {
-                try { OnlineSyncManager.syncToCloud(repository) } catch (_: Exception) {}
+            val mistri = repository.getMistriById(mistriId)
+            if (mistri != null) {
+                launch {
+                    FirestoreSyncManager.updateMistriStatus(getApplication(), mistri.mobileNumber, !currentStatus)
+                }
             }
         }
     }
@@ -267,21 +281,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun saveLabour(name: String, mobile: String, labourId: Long = 0, onSuccess: () -> Unit) {
         val mistri = _currentMistri.value ?: return
         viewModelScope.launch {
-            repository.saveLabour(mistri.id, name, mobile, labourId)
+            val savedId = repository.saveLabour(mistri.id, name, mobile, labourId)
             _toastEvent.emit("Labour details saved")
-            launch {
-                try { OnlineSyncManager.syncToCloud(repository) } catch (_: Exception) {}
+            val savedEntity = repository.getLabourById(savedId)
+            if (savedEntity != null) {
+                launch {
+                    FirestoreSyncManager.pushLabour(getApplication(), mistri.mobileNumber, mistri.fullName, savedEntity)
+                }
             }
             onSuccess()
         }
     }
 
     fun deleteLabour(labour: LabourEntity) {
+        val mistri = _currentMistri.value
         viewModelScope.launch {
             repository.deleteLabour(labour)
             _toastEvent.emit("Labour removed")
             launch {
-                try { OnlineSyncManager.syncToCloud(repository) } catch (_: Exception) {}
+                val phone = mistri?.mobileNumber ?: repository.getMistriById(labour.mistriId)?.mobileNumber ?: ""
+                FirestoreSyncManager.deleteLabour(getApplication(), phone, labour)
             }
         }
     }
@@ -310,7 +329,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                repository.saveNightShiftEntry(
+                val savedId = repository.saveNightShiftEntry(
                     id = entryId,
                     mistriId = mistriId,
                     mistriName = mistriName,
@@ -322,9 +341,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     remarks = remarks
                 )
                 _toastEvent.emit("Shift entry saved successfully")
-                // Instantly sync to cloud so Admin device sees this entry in real time
-                launch {
-                    try { OnlineSyncManager.syncToCloud(repository) } catch (_: Exception) {}
+                val mistri = repository.getMistriById(mistriId)
+                val savedEntry = repository.getEntryById(savedId)
+                if (savedEntry != null) {
+                    // Instantly sync to Firestore cloud so Admin device sees this entry in real time
+                    launch {
+                        FirestoreSyncManager.pushNightShiftEntry(
+                            context = getApplication(),
+                            entry = savedEntry,
+                            mistriPhone = mistri?.mobileNumber ?: ""
+                        )
+                    }
                 }
                 onSuccess()
             } catch (e: Exception) {
@@ -338,7 +365,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             repository.deleteEntry(entry)
             _toastEvent.emit("Shift record deleted")
             launch {
-                try { OnlineSyncManager.syncToCloud(repository) } catch (_: Exception) {}
+                FirestoreSyncManager.deleteNightShiftEntry(getApplication(), entry)
             }
         }
     }
@@ -347,14 +374,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun syncOnlineCloud() {
         viewModelScope.launch {
             _isSyncing.value = true
-            val pullResult = OnlineSyncManager.syncFromCloud(repository)
-            val pushResult = OnlineSyncManager.syncToCloud(repository)
-            _isSyncing.value = false
-
-            if (pullResult.isSuccess || pushResult.isSuccess) {
-                _toastEvent.emit("Data synced across devices successfully!")
-            } else {
-                _toastEvent.emit("Sync offline: changes saved locally on device")
+            try {
+                FirestoreSyncManager.uploadExistingLocalDataToCloud(getApplication(), repository)
+                _toastEvent.emit("Online Cloud: All records synced in real-time!")
+            } catch (e: Exception) {
+                _toastEvent.emit("Sync notice: ${e.message}")
+            } finally {
+                _isSyncing.value = false
             }
         }
     }

@@ -99,7 +99,9 @@ object Strings {
         "sync_success" to "Online data synced successfully across all devices!",
         "export_backup" to "Export Backup JSON",
         "import_backup" to "Import / Restore Backup",
-        "all_device_info" to "Admin can view all entries from any phone or device."
+        "all_device_info" to "Admin can view all entries from any phone or device.",
+        "cloud_online" to "Cloud Online (Live Realtime Sync)",
+        "cloud_synced_desc" to "All data is securely synced across all phones in real-time."
     )
 
     private val bengaliStrings = mapOf(
@@ -190,6 +192,8 @@ object Strings {
         "sync_success" to "সব ডিভাইসের ডেটা সফলভাবে সিঙ্ক হয়েছে!",
         "export_backup" to "ব্যাকআপ ফাইল তৈরি (JSON)",
         "import_backup" to "ব্যাকআপ ফাইল যুক্ত / রিস্টোর",
-        "all_device_info" to "যেকোনো ডিভাইসে অ্যাপ ইন্সটল করে অ্যাডমিন সব মিস্ত্রির ডেটা দেখতে পারবেন।"
+        "all_device_info" to "যেকোনো ডিভাইসে অ্যাপ ইন্সটল করে অ্যাডমিন সব মিস্ত্রির ডেটা দেখতে পারবেন।",
+        "cloud_online" to "অনলাইন ক্লাউড (লাইভ রিয়েলটাইম সিঙ্ক সক্রিয়)",
+        "cloud_synced_desc" to "সব ফোনের ডেটা ক্লাউডে লাইভ সিঙ্ক হচ্ছে, অ্যাডমিন তাৎক্ষণিক দেখতে পাবেন।"
     )
 }

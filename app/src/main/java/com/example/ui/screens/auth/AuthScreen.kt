@@ -39,6 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -46,6 +47,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +75,7 @@ fun AuthScreen(
     viewModel: MainViewModel,
     language: AppLanguage
 ) {
+    val isCloudConnected by viewModel.isCloudConnected.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Mistri, 1: Admin
     var isMistriRegister by remember { mutableStateOf(false) }
 
@@ -146,7 +149,33 @@ fun AuthScreen(
                     )
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Surface(
+                    color = if (isCloudConnected) Color(0xFFE8F5E9) else Color(0xFFE3F2FD),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(if (isCloudConnected) Color(0xFF2E7D32) else Color(0xFF1565C0))
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = Strings.get("cloud_online", language),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isCloudConnected) Color(0xFF1B5E20) else Color(0xFF0D47A1)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Dual Role Tab
                 TabRow(

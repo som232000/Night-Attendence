@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "Mistri": {
+      "title": "Mistri",
+      "description": "Registered Mistri account",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fullName": { "type": "string" },
+        "mobileNumber": { "type": "string" },
+        "password": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["fullName", "mobileNumber"]
+    },
+    "Labour": {
+      "title": "Labour",
+      "description": "Labour worker registered under a Mistri",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "mistriId": { "type": "number" },
+        "mistriPhone": { "type": "string" },
+        "name": { "type": "string" },
+        "mobileNumber": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["name"]
+    },
+    "NightShiftEntry": {
+      "title": "NightShiftEntry",
+      "description": "Night shift work record entered by a Mistri",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "mistriId": { "type": "number" },
+        "mistriName": { "type": "string" },
+        "labourId": { "type": "number" },
+        "labourName": { "type": "string" },
+        "workPlace": { "type": "string" },
+        "workDate": { "type": "string" },
+        "shiftDetails": { "type": "string" },
+        "remarks": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["mistriName", "labourName", "workPlace", "workDate", "shiftDetails"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin credentials",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      },
+      "required": ["username", "password"]
+    }
+  },
+  "firestore": {
+    "/mistris/{mistriId}": {
+      "schema": "Mistri",
+      "description": "Mistri records"
+    },
+    "/labours/{labourId}": {
+      "schema": "Labour",
+      "description": "Labour records"
+    },
+    "/night_shift_entries/{entryId}": {
+      "schema": "NightShiftEntry",
+      "description": "Night shift work entries"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Admin configuration"
+    }
+  }
+}

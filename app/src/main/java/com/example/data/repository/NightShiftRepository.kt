@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.first
 import org.json.JSONArray
 import org.json.JSONObject
 
+import java.util.UUID
+
 class NightShiftRepository(private val database: AppDatabase) {
 
     private val mistriDao = database.mistriDao()
@@ -69,6 +71,14 @@ class NightShiftRepository(private val database: AppDatabase) {
         mistriDao.updateMistriStatus(mistriId, isActive)
     }
 
+    suspend fun updateMistri(mistri: MistriEntity) {
+        mistriDao.updateMistri(mistri)
+    }
+
+    suspend fun getMistriByMobile(mobile: String): MistriEntity? = mistriDao.getMistriByMobile(mobile.trim())
+    suspend fun getMistriById(id: Long): MistriEntity? = mistriDao.getMistriById(id)
+    suspend fun insertDirectMistri(mistri: MistriEntity): Long = mistriDao.insertMistri(mistri)
+
     fun getAllMistris(): Flow<List<MistriEntity>> = mistriDao.getAllMistris()
 
     fun getMistriCount(): Flow<Int> = mistriDao.getMistriCount()
@@ -78,13 +88,31 @@ class NightShiftRepository(private val database: AppDatabase) {
     fun getLaboursForMistri(mistriId: Long): Flow<List<LabourEntity>> = labourDao.getLaboursByMistri(mistriId)
     fun getAllLabours(): Flow<List<LabourEntity>> = labourDao.getAllLabours()
     fun getTotalLabourCount(): Flow<Int> = labourDao.getTotalLabourCount()
+    suspend fun findLabourByName(mistriId: Long, name: String): LabourEntity? = labourDao.findLabourByName(mistriId, name.trim())
+    suspend fun getLabourById(id: Long): LabourEntity? = labourDao.getLabourById(id)
+    suspend fun getLabourByCloudId(cloudId: String): LabourEntity? =
+        if (cloudId.isBlank()) null else labourDao.getLabourByCloudId(cloudId)
 
-    suspend fun saveLabour(mistriId: Long, name: String, mobile: String, labourId: Long = 0): Long {
+    suspend fun saveLabour(
+        mistriId: Long,
+        name: String,
+        mobile: String,
+        labourId: Long = 0,
+        cloudId: String = ""
+    ): Long {
+        val existing = if (labourId != 0L) labourDao.getLabourById(labourId) else null
+        val resolvedCloudId = when {
+            cloudId.isNotBlank() -> cloudId
+            existing != null && existing.cloudId.isNotBlank() -> existing.cloudId
+            else -> UUID.randomUUID().toString()
+        }
         val entity = LabourEntity(
             id = labourId,
+            cloudId = resolvedCloudId,
             mistriId = mistriId,
             name = name.trim(),
-            mobileNumber = mobile.trim()
+            mobileNumber = mobile.trim(),
+            createdAt = existing?.createdAt ?: System.currentTimeMillis()
         )
         return if (labourId == 0L) {
             labourDao.insertLabour(entity)
@@ -93,6 +121,9 @@ class NightShiftRepository(private val database: AppDatabase) {
             labourId
         }
     }
+
+    suspend fun insertLabourDirect(labour: LabourEntity): Long = labourDao.insertLabour(labour)
+    suspend fun updateLabourDirect(labour: LabourEntity) = labourDao.updateLabour(labour)
 
     suspend fun deleteLabour(labour: LabourEntity) {
         labourDao.deleteLabour(labour)
@@ -105,6 +136,9 @@ class NightShiftRepository(private val database: AppDatabase) {
     fun getTodayEntryCount(today: String): Flow<Int> = shiftDao.getEntryCountForDate(today)
     fun getAllWorkPlaces(): Flow<List<String>> = shiftDao.getAllWorkPlaces()
     fun getAvailableMonths(): Flow<List<String>> = shiftDao.getAvailableMonths()
+    suspend fun getEntryById(id: Long): NightShiftEntryEntity? = shiftDao.getEntryById(id)
+    suspend fun getEntryByCloudId(cloudId: String): NightShiftEntryEntity? =
+        if (cloudId.isBlank()) null else shiftDao.getEntryByCloudId(cloudId)
 
     suspend fun saveNightShiftEntry(
         id: Long = 0,
@@ -115,10 +149,18 @@ class NightShiftRepository(private val database: AppDatabase) {
         workPlace: String,
         workDate: String,
         shiftDetails: String,
-        remarks: String
+        remarks: String,
+        cloudId: String = ""
     ): Long {
+        val existing = if (id != 0L) shiftDao.getEntryById(id) else null
+        val resolvedCloudId = when {
+            cloudId.isNotBlank() -> cloudId
+            existing != null && existing.cloudId.isNotBlank() -> existing.cloudId
+            else -> UUID.randomUUID().toString()
+        }
         val entry = NightShiftEntryEntity(
             id = id,
+            cloudId = resolvedCloudId,
             mistriId = mistriId,
             mistriName = mistriName.trim(),
             labourId = labourId,
@@ -126,7 +168,8 @@ class NightShiftRepository(private val database: AppDatabase) {
             workPlace = workPlace.trim(),
             workDate = workDate.trim(),
             shiftDetails = shiftDetails.trim(),
-            remarks = remarks.trim()
+            remarks = remarks.trim(),
+            createdAt = existing?.createdAt ?: System.currentTimeMillis()
         )
         return if (id == 0L) {
             shiftDao.insertEntry(entry)
@@ -136,6 +179,9 @@ class NightShiftRepository(private val database: AppDatabase) {
         }
     }
 
+    suspend fun insertEntryDirect(entry: NightShiftEntryEntity): Long = shiftDao.insertEntry(entry)
+    suspend fun updateEntryDirect(entry: NightShiftEntryEntity) = shiftDao.updateEntry(entry)
+
     suspend fun deleteEntry(entry: NightShiftEntryEntity) {
         shiftDao.deleteEntry(entry)
     }
@@ -143,6 +189,20 @@ class NightShiftRepository(private val database: AppDatabase) {
     suspend fun deleteEntryById(id: Long) {
         shiftDao.deleteEntryById(id)
     }
+
+    suspend fun findExistingEntry(
+        mistriName: String,
+        labourName: String,
+        workPlace: String,
+        workDate: String,
+        shiftDetails: String
+    ): NightShiftEntryEntity? = shiftDao.findExistingEntry(
+        mistriName = mistriName.trim(),
+        labourName = labourName.trim(),
+        workPlace = workPlace.trim(),
+        workDate = workDate.trim(),
+        shiftDetails = shiftDetails.trim()
+    )
 
     // CROSS-DEVICE DATA SYNC / BACKUP / RESTORE
     suspend fun exportDatabaseJson(): String {

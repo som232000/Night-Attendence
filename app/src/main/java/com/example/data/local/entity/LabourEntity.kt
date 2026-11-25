@@ -7,19 +7,15 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "labours",
-    foreignKeys = [
-        ForeignKey(
-            entity = MistriEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["mistriId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
-    indices = [Index(value = ["mistriId"])]
+    indices = [
+        Index(value = ["mistriId"]),
+        Index(value = ["cloudId"])
+    ]
 )
 data class LabourEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val cloudId: String = "",
     val mistriId: Long,
     val name: String,
     val mobileNumber: String = "",

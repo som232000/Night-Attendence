@@ -37,4 +37,7 @@ interface LabourDao {
 
     @Query("SELECT * FROM labours WHERE id = :id LIMIT 1")
     suspend fun getLabourById(id: Long): LabourEntity?
+
+    @Query("SELECT * FROM labours WHERE cloudId = :cloudId LIMIT 1")
+    suspend fun getLabourByCloudId(cloudId: String): LabourEntity?
 }

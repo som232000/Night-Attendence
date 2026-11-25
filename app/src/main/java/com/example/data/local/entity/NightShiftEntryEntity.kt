@@ -9,12 +9,14 @@ import androidx.room.PrimaryKey
     indices = [
         Index(value = ["mistriId"]),
         Index(value = ["labourId"]),
-        Index(value = ["workDate"])
+        Index(value = ["workDate"]),
+        Index(value = ["cloudId"])
     ]
 )
 data class NightShiftEntryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val cloudId: String = "",
     val mistriId: Long,
     val mistriName: String,
     val labourId: Long,
